@@ -1,0 +1,187 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 27 60% 96%;
+    --foreground: 24 10% 20%;
+    --card: 27 60% 99%;
+    --card-foreground: 24 10% 20%;
+    --popover: 27 60% 99%;
+    --popover-foreground: 24 10% 20%;
+    --primary: 21 80% 46%;
+    --primary-foreground: 24 100% 98%;
+    --secondary: 28 33% 90%;
+    --secondary-foreground: 21 80% 46%;
+    --muted: 28 33% 85%;
+    --muted-foreground: 24 10% 40%;
+    --accent: 28 33% 85%;
+    --accent-foreground: 21 80% 46%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 28 33% 80%;
+    --input: 28 33% 88%;
+    --ring: 21 80% 46%;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 24 10% 10%;
+    --foreground: 27 60% 96%;
+    --card: 24 10% 12%;
+    --card-foreground: 27 60% 96%;
+    --popover: 24 10% 10%;
+    --popover-foreground: 27 60% 96%;
+    --primary: 21 80% 46%;
+    --primary-foreground: 24 100% 98%;
+    --secondary: 24 10% 20%;
+    --secondary-foreground: 21 80% 50%;
+    --muted: 24 10% 20%;
+    --muted-foreground: 27 60% 80%;
+    --accent: 24 10% 20%;
+    --accent-foreground: 21 80% 50%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 24 10% 25%;
+    --input: 24 10% 25%;
+    --ring: 21 80% 50%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  ::selection {
+    background-color: #d45715;
+    color: #f9f3ef;
+  }
+}
+
+@layer utilities {
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+}
+
+.milkdown .ProseMirror.ProseMirror-empty:first-child::before {
+  position: absolute;
+  content: attr(data-placeholder);
+  color: hsl(var(--muted-foreground));
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.milkdown .ProseMirror:focus {
+  outline: none !important;
+}
+
+/* Task List Styles for Milkdown Editor & React Markdown Cards */
+.milkdown ul[data-task-list],
+.prose ul.contains-task-list {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.milkdown .task-list-item,
+.prose li.task-list-item {
+  display: flex;
+  align-items: flex-start;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+/* Hide the original bullet from the list item */
+.milkdown .task-list-item::marker,
+.prose li.task-list-item::marker {
+  display: none !important;
+  content: '' !important;
+}
+/* Tailwind's typography plugin uses ::before for bullets, so we hide it here for task list items */
+.prose li.task-list-item::before {
+  display: none !important;
+}
+
+
+/* --- Milkdown Editor Specific --- */
+/* The checkbox wrapper itself */
+.milkdown .task-list-item > .task-list-item_checkbox {
+  flex-shrink: 0;
+  height: 1.25em;
+  width: 1.25em;
+  margin: 0.2em 0.5em 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 2px solid hsl(var(--border));
+  transition: background-color 0.2s, border-color 0.2s;
+  box-sizing: border-box;
+}
+
+/* When the item is checked */
+.milkdown .task-list-item[data-checked="true"] > .task-list-item_checkbox {
+  background: hsl(var(--primary));
+  border-color: hsl(var(--primary));
+}
+
+/* The checkmark icon inside the box */
+.milkdown .task-list-item[data-checked="true"] > .task-list-item_checkbox::after {
+  content: '';
+  display: block;
+  width: 0.35em;
+  height: 0.7em;
+  transform: rotate(45deg);
+  border-right: 2px solid hsl(var(--primary-foreground));
+  border-bottom: 2px solid hsl(var(--primary-foreground));
+  margin-bottom: 0.15em;
+}
+
+/* Strike through the text when checked */
+.milkdown .task-list-item[data-checked="true"] > div:last-of-type {
+  text-decoration: line-through;
+  color: hsl(var(--muted-foreground));
+}
+
+/* --- React Markdown Card & Viewer Specific --- */
+/* The native checkbox used on cards */
+.prose li.task-list-item input[type="checkbox"] {
+  margin-top: 0.3em;
+  margin-right: 0.5em;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.prose li.task-list-item:has(input:disabled) input {
+  cursor: default;
+}
+
+/* Strike through text when checked */
+.prose li.task-list-item:has(input[type="checkbox"]:checked) {
+  text-decoration: line-through;
+  color: hsl(var(--muted-foreground));
+}

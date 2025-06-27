@@ -1,0 +1,21 @@
+{
+  "name": "Mini ALPS: Your Personal Knowledge Vault",
+  "short_name": "Mini ALPS",
+  "description": "Your personal knowledge vault, offline-first and ready for anything.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f3f0",
+  "theme_color": "#D45715",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}
