@@ -69,9 +69,6 @@ export function ArtifactEditor({ artifact, isOpen, onClose, activeSpaceId }: Art
     });
   }
 
-  const handleUndo = () => editorRef.current?.undo();
-  const handleRedo = () => editorRef.current?.redo();
-
   useEffect(() => {
     if (isOpen) {
       setIsClosing(false);
@@ -349,12 +346,6 @@ export function ArtifactEditor({ artifact, isOpen, onClose, activeSpaceId }: Art
         {!isFullScreen && (
           <DialogFooter className="p-4 border-t bg-background/50 flex flex-row items-center justify-between shrink-0">
               <div className="flex items-center gap-2">
-                  <Button variant="outline" size="icon" className="h-9 w-9" onClick={handleUndo} disabled={isProcessing || isReadonlyEditor}>
-                      <Undo className="h-4 w-4" />
-                  </Button>
-                  <Button variant="outline" size="icon" className="h-9 w-9" onClick={handleRedo} disabled={isProcessing || isReadonlyEditor}>
-                      <Redo className="h-4 w-4" />
-                  </Button>
                   <Separator orientation="vertical" className="h-6 mx-1" />
                   <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="*" />
                   <Button variant="outline" size="icon" className="h-9 w-9" onClick={() => fileInputRef.current?.click()} disabled={isProcessing || !!artifact}>
