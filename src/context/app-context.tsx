@@ -69,9 +69,11 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [anchors, setAnchors] = useState<Anchor[]>([]);
   const [spaces, setSpaces] = useState<Space[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const { toast } = useToast();
 
   const loadData = useCallback(async () => {
+    setIsLoading(true);
     try {
       const [dbArtifacts, dbAnchors, dbSpaces] = await Promise.all([getAllArtifacts(), getAllAnchors(), getAllSpaces()]);
       setArtifacts(dbArtifacts);
@@ -82,8 +84,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       toast({ title: "Error", description: "Could not load data.", variant: "destructive" });
     } finally {
       setIsLoading(false);
+      if(isInitialLoad) setIsInitialLoad(false);
     }
-  }, [toast]);
+  }, [toast, isInitialLoad]);
   
   useEffect(() => {
     const requestPersistence = async () => {
@@ -95,6 +98,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         try {
           const result = await navigator.storage.persist();
            if(result) {
+              toast({ title: "Offline Storage Secured", description: "Your data will be safely stored on this device." });
               console.log("Storage persistence successfully granted.");
           } else {
               console.warn("Storage persistence request was not granted.");
@@ -107,7 +111,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     requestPersistence();
     loadData();
-  }, [loadData]);
+  }, [loadData, toast]);
   
   // --- Artifact Logic ---
 
@@ -419,14 +423,14 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       delete: deleteSpace,
       addArtifactsToSpace,
     },
-    isLoading,
+    isLoading: isInitialLoad ? true : isLoading,
     importData,
     exportData,
   }), [
       artifacts, addArtifact, updateArtifact, toggleArtifactState, deleteArtifact, deleteAllArtifacts, addArtifactFromFile,
       anchors, addAnchor, updateAnchor, toggleAnchorState, deleteAnchor,
       spaces, addSpace, updateSpace, deleteSpace, addArtifactsToSpace,
-      isLoading, importData, exportData
+      isLoading, isInitialLoad, importData, exportData
     ]);
 
   return (
