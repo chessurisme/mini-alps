@@ -8,10 +8,10 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { X, Tag, Loader2, Paperclip, Maximize, Minimize, Undo, Redo } from 'lucide-react';
+import { X, Tag, Loader2, Paperclip, Maximize, Minimize } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { extractYouTubeID, getYouTubeThumbnail, getYouTubeTitle } from '@/lib/youtube';
-import { MilkdownEditor, type MilkdownEditorHandles } from './milkdown-editor';
+import { MilkdownEditor } from './milkdown-editor';
 import { colors } from '@/lib/color-names';
 import { findClosestColor } from '@/lib/color-utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -45,7 +45,6 @@ export function ArtifactEditor({ artifact, isOpen, onClose, activeSpaceId }: Art
   const [isClosing, setIsClosing] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [isUiVisible, setIsUiVisible] = useState(true);
-  const editorRef = useRef<MilkdownEditorHandles>(null);
   const uiTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
 
@@ -68,9 +67,6 @@ export function ArtifactEditor({ artifact, isOpen, onClose, activeSpaceId }: Art
         return `[#${artifactId}](wm://open/${artifactId})`;
     });
   }
-
-  const handleUndo = () => editorRef.current?.undo();
-  const handleRedo = () => editorRef.current?.redo();
 
   useEffect(() => {
     if (isOpen) {
@@ -337,7 +333,6 @@ export function ArtifactEditor({ artifact, isOpen, onClose, activeSpaceId }: Art
           
           <div className="flex-grow prose dark:prose-invert max-w-[65ch] w-full mx-auto prose-p:my-0 prose-p:leading-[1.618] [&_.ProseMirror]:min-h-[40vh] [&_.ProseMirror]:p-2 [&_.ProseMirror]:focus:outline-none [&_.ProseMirror]:shadow-none [&_.ProseMirror]:bg-transparent">
              <MilkdownEditor 
-                ref={editorRef}
                 key={artifact?.id || 'new-artifact'} 
                 content={content} 
                 onChange={setContent} 
@@ -349,13 +344,6 @@ export function ArtifactEditor({ artifact, isOpen, onClose, activeSpaceId }: Art
         {!isFullScreen && (
           <DialogFooter className="p-4 border-t bg-background/50 flex flex-row items-center justify-between shrink-0">
               <div className="flex items-center gap-2">
-                  <Button variant="outline" size="icon" className="h-9 w-9" onClick={handleUndo} disabled={isProcessing || isReadonlyEditor}>
-                      <Undo className="h-4 w-4" />
-                  </Button>
-                  <Button variant="outline" size="icon" className="h-9 w-9" onClick={handleRedo} disabled={isProcessing || isReadonlyEditor}>
-                      <Redo className="h-4 w-4" />
-                  </Button>
-                  <Separator orientation="vertical" className="h-6 mx-1" />
                   <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="*" />
                   <Button variant="outline" size="icon" className="h-9 w-9" onClick={() => fileInputRef.current?.click()} disabled={isProcessing || !!artifact}>
                       <Paperclip className="h-4 w-4" />
