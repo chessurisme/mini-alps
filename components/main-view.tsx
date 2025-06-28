@@ -341,10 +341,20 @@ export default function MainView() {
     }
   }
 
+  const renderSkeletonGrid = () => (
+    <div className="p-4 sm:p-6 lg:p-8 columns-2 sm:columns-2 md:columns-3 lg:columns-4 xl:columns-5 gap-4">
+      {Array.from({ length: 10 }).map((_, i) => (
+        <div key={i} className="mb-4 break-inside-avoid">
+          <Skeleton className="w-full aspect-[4/3] rounded-lg" />
+        </div>
+      ))}
+    </div>
+  );
+
   if (!isMounted) {
     return (
       <div className="flex h-screen bg-background">
-        <aside className={cn('flex flex-col items-center py-4', 'px-2')}>
+        <aside className={cn('hidden md:flex flex-col items-center py-4', 'px-2')}>
           <a href="#" className={cn("flex items-center gap-2 text-primary")}>
             <Box className="w-8 h-8" />
           </a>
@@ -387,9 +397,7 @@ export default function MainView() {
           </header>
 
           <div className="flex-1 overflow-y-auto relative">
-            <div className="p-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-              {Array.from({ length: 10 }).map((_, i) => (<Skeleton key={i} className="w-full aspect-[4/3] rounded-2xl" />))}
-            </div>
+            {renderSkeletonGrid()}
           </div>
         </main>
       </div>
@@ -458,9 +466,7 @@ export default function MainView() {
 
         <div className="flex-1 overflow-y-auto relative">
           {isLoading ? (
-            <div className="p-4 sm:p-6 lg:p-8 columns-2 sm:columns-2 md:columns-3 lg:columns-4 xl:columns-5 gap-4">
-              {Array.from({ length: 10 }).map((_, i) => (<Skeleton key={i} className="w-full aspect-[4/3] rounded-xl" />))}
-            </div>
+            renderSkeletonGrid()
           ) : (
             <>
               {activeView === 'spaces' && !activeSpace && <SpacesGrid spaces={filteredSpaces} onSpaceClick={(space) => updateQuery({space: space.id})} onEditSpace={handleEditSpace} onDeleteSpace={setSpaceToDelete} />}
