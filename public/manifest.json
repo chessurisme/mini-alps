@@ -1,9 +1,11 @@
 {
 	"name": "Mini ALPS: Your Personal Knowledge Vault",
 	"short_name": "Mini ALPS",
+	"id": "Mini ALPS",
 	"lang": "en",
 	"scope": "/",
 	"dir": "ltr",
+	"categories": ["productivity", "utilities"],
 	"description": "Your personal knowledge vault, offline-first and ready for anything.",
 	"start_url": "/",
 	"display": "standalone",
