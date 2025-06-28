@@ -318,18 +318,10 @@ export function ArtifactViewer({ artifact, isOpen, onClose, onEdit, onNavigate, 
             <DialogHeader className="sr-only">
                 <DialogTitle>{artifact.title || 'Article'}</DialogTitle>
             </DialogHeader>
-            <style jsx>{`
-              .prose-article :global(img), .prose-article :global(video), .prose-article :global(iframe) {
-                  width: 100vw;
-                  max-width: 100vw;
-                  margin-left: 50%;
-                  transform: translateX(-50%);
-              }
-            `}</style>
             <ScrollArea ref={scrollAreaRef} className="flex-grow bg-background">
-              <div className="container mx-auto px-6 sm:px-4 py-12">
+              <div className="container mx-auto px-4 sm:px-6 py-12">
                 {artifact.leadImageUrl && (
-                  <div className="relative aspect-[16/4] mb-8 rounded-lg overflow-hidden -mx-4">
+                  <div className="relative aspect-[16/4] mb-8 rounded-lg overflow-hidden -mx-4 sm:-mx-6">
                     <img
                       src={artifact.leadImageUrl}
                       alt={artifact.title}
@@ -338,7 +330,7 @@ export function ArtifactViewer({ artifact, isOpen, onClose, onEdit, onNavigate, 
                     />
                   </div>
                 )}
-                <article className="prose prose-lg lg:prose-xl dark:prose-invert mx-auto max-w-[65ch] prose-article text-pretty">
+                <article className="prose prose-lg lg:prose-xl dark:prose-invert mx-auto max-w-[65ch] text-pretty">
                   <h1 className="font-headline text-center">{artifact.title}</h1>
                   <div dangerouslySetInnerHTML={{ __html: artifact.content }} />
                 </article>
