@@ -5,10 +5,10 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Separator } from '@/components/ui/separator';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import type { Dispatch, SetStateAction } from 'react';
-import { Upload, Download, Anchor, Box, HelpCircle, Plus, Eclipse, Shield, Settings, X } from 'lucide-react';
+import { Upload, Download, Anchor, Box, HelpCircle, Plus, Eclipse, Shield, Settings } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from './ui/scroll-area';
 
@@ -20,10 +20,9 @@ interface SidebarProps {
   onImportClick: () => void;
   onExportClick: () => void;
   className?: string;
-  isMobile?: boolean;
 }
 
-export function Sidebar({ activeView, setActiveView, onImportClick, onExportClick, className, isMobile = false }: SidebarProps) {
+export function Sidebar({ activeView, setActiveView, onImportClick, onExportClick, className }: SidebarProps) {
   const { toast } = useToast();
 
   const navItems = [
@@ -45,30 +44,20 @@ export function Sidebar({ activeView, setActiveView, onImportClick, onExportClic
   const navItemContent = (item: typeof navItems[0]) => (
     <Button
       variant={activeView === item.name ? 'secondary' : 'ghost'}
-      size={isMobile ? 'default' : 'icon'}
+      size='icon'
       onClick={() => setActiveView(item.name)}
       aria-label={item.label}
       className={cn(
         'rounded-lg transition-colors duration-300 ease-smooth',
-        isMobile && 'w-full justify-start',
         activeView === item.name && 'text-primary'
       )}
     >
       <item.icon className="w-5 h-5" />
-      {isMobile && <span className="ml-4 font-semibold">{item.label}</span>}
     </Button>
   );
 
-  const bottomIconContent = (Icon: React.ElementType, label: string, dialogContent?: React.ReactNode, onClick?: () => void, fullScreen?: boolean) => (
+  const bottomIconContent = (Icon: React.ElementType, label: string, dialogContent?: React.ReactNode, onClick?: () => void) => (
     <Dialog>
-      {isMobile ? (
-        <DialogTrigger asChild>
-          <Button variant="ghost" size="default" aria-label={label} className="w-full justify-start rounded-lg" onClick={onClick}>
-            <Icon className="w-5 h-5" />
-            <span className="ml-4 font-semibold">{label}</span>
-          </Button>
-        </DialogTrigger>
-      ) : (
         <Tooltip>
           <TooltipTrigger asChild>
             <DialogTrigger asChild>
@@ -77,36 +66,32 @@ export function Sidebar({ activeView, setActiveView, onImportClick, onExportClic
           </TooltipTrigger>
           <TooltipContent side="right"><p>{label}</p></TooltipContent>
         </Tooltip>
-      )}
       {dialogContent}
     </Dialog>
   );
 
   return (
-    <TooltipProvider delayDuration={isMobile ? 99999 : 0}>
-      <aside className={cn('flex flex-col items-center py-4', isMobile ? 'w-full px-2' : 'px-2', className)}>
-        <a href="#" onClick={handleLogoClick} className={cn("flex items-center gap-2 text-primary", isMobile && 'self-start px-3 pb-4')}>
+    <TooltipProvider>
+      <aside className={cn('flex flex-col items-center py-4 px-2', className)}>
+        <a href="#" onClick={handleLogoClick} className={cn("flex items-center gap-2 text-primary")}>
           <Box className="w-8 h-8" />
-          {isMobile && <span className="text-xl font-display font-bold select-none text-primary italic">Mini ALPS</span>}
         </a>
-        <nav className={cn("flex flex-col items-center gap-2", isMobile ? "w-full" : "mt-8")}>
+        <nav className={cn("flex flex-col items-center gap-2", "mt-8")}>
           {navItems.map((item) => (
             <React.Fragment key={item.name}>
-              {isMobile ? navItemContent(item) : (
                 <Tooltip>
                   <TooltipTrigger asChild>{navItemContent(item)}</TooltipTrigger>
                   <TooltipContent side="right"><p>{item.label}</p></TooltipContent>
                 </Tooltip>
-              )}
             </React.Fragment>
           ))}
         </nav>
 
         <div className="flex-grow" />
         
-        <Separator className={cn(isMobile ? 'my-2' : 'my-4')} />
+        <Separator className='my-4' />
 
-        <div className={cn("flex flex-col items-center gap-2", isMobile && "w-full")}>
+        <div className={cn("flex flex-col items-center gap-2")}>
             {bottomIconContent(HelpCircle, "Help", 
               <DialogContent className="max-w-full w-full h-full flex flex-col p-0 gap-0 border-0">
                   <DialogHeader className="p-4 border-b flex flex-row items-center">

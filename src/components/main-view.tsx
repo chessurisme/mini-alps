@@ -14,7 +14,7 @@ import { ArtifactViewer } from '@/components/artifact-viewer';
 import { AddArtifactsToSpaceDialog } from '@/components/add-artifacts-to-space-dialog';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Menu, Plus, Search, Trash2, X, Binary, Edit, Box, Eclipse, Anchor as AnchorIcon, HelpCircle, Shield, Settings } from 'lucide-react';
+import { MoreVertical, Plus, Search, Trash2, X, Binary, Edit, Box, Eclipse, Anchor as AnchorIcon, HelpCircle, Shield, Settings, Upload, Download } from 'lucide-react';
 import { Artifact, Anchor, Space, ArtifactType } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from './ui/skeleton';
@@ -22,12 +22,15 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Badge } from '@/components/ui/badge';
 import { matchDateTimePatterns, calculateDateRange } from '@/lib/date-parser';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { Separator } from './ui/separator';
+import { MobileBottomNav } from './mobile-bottom-nav';
+import { ScrollArea } from './ui/scroll-area';
 
 
 type View = 'spaces' | 'artifacts' | 'anchors';
@@ -72,7 +75,6 @@ export default function MainView() {
   const [placeholder, setPlaceholder] = useState(PLACEHOLDERS[0]);
   const [isDetonateDialogOpen, setDetonateDialogOpen] = useState(false);
   const [spaceToDelete, setSpaceToDelete] = useState<Space | null>(null);
-  const [isSheetOpen, setSheetOpen] = useState(false);
   const [skeletonRatios, setSkeletonRatios] = useState<string[]>([]);
   
   const [isMounted, setIsMounted] = useState(false);
@@ -270,19 +272,6 @@ export default function MainView() {
 
   const artifactsInTrashCount = useMemo(() => artifactsContext.all.filter(a => a.isTrashed).length, [artifactsContext.all]);
   const anchorsInTrashCount = useMemo(() => anchorsContext.all.filter(a => a.isTrashed).length, [anchorsContext.all]);
-
-  const sidebarContent = (
-    <Sidebar 
-      isMobile={isMobile}
-      activeView={activeView} 
-      setActiveView={(view) => {
-        updateQuery({ view: view, space: null });
-        if (isMobile) setSheetOpen(false);
-      }} 
-      onImportClick={() => fileInputRef.current?.click()} 
-      onExportClick={exportData} 
-    />
-  );
   
   const renderHeaderTitle = () => {
     if (activeSpace) {
@@ -425,27 +414,20 @@ export default function MainView() {
 
   return (
     <div className="flex h-screen bg-background">
-      {!isMobile && sidebarContent}
+      {!isMobile && (
+        <Sidebar 
+          activeView={activeView} 
+          setActiveView={(view) => updateQuery({ view: view, space: null })} 
+          onImportClick={() => fileInputRef.current?.click()} 
+          onExportClick={exportData} 
+        />
+      )}
 
       <main className="flex-1 flex flex-col overflow-hidden">
         <header className="flex items-center justify-between p-4 border-b shrink-0 gap-2 md:gap-4">
            <div className="flex items-center gap-2">
-             {isMobile && (
-               <Sheet open={isSheetOpen} onOpenChange={setSheetOpen}>
-                 <SheetTrigger asChild>
-                   <Button variant="ghost" size="icon">
-                     <Menu className="h-6 w-6" />
-                   </Button>
-                 </SheetTrigger>
-                 <SheetContent side="left" className="p-0 w-[250px] bg-card border-r">
-                   <SheetHeader>
-                      <SheetTitle className="sr-only">Main Menu</SheetTitle>
-                   </SheetHeader>
-                   {sidebarContent}
-                 </SheetContent>
-               </Sheet>
-             )}
-             {(!searchQuery.trim() && !timeFilter) && renderHeaderTitle()}
+             {isMobile && <a href="#" className="text-primary -ml-2"><Box className="w-8 h-8" /></a>}
+             {(!isMobile || (!searchQuery.trim() && !timeFilter)) && renderHeaderTitle()}
            </div>
           <div className="flex items-center gap-2 flex-grow justify-center">
             <div className="relative w-full max-w-md">
@@ -480,10 +462,98 @@ export default function MainView() {
             {normalizedSearch === 'trash' && (activeView !== 'anchors') && artifactsInTrashCount > 0 && (<Button variant="destructive" onClick={emptyArtifactTrash}><Trash2 className="mr-2 h-4 w-4" /> Empty Trash</Button>)}
             {normalizedSearch === 'trash' && activeView === 'anchors' && anchorsInTrashCount > 0 && (<Button variant="destructive" onClick={emptyAnchorTrash}><Trash2 className="mr-2 h-4 w-4" /> Empty Anchor Trash</Button>)}
             <input type="file" ref={fileInputRef} onChange={(e) => { e.target.files && importData(e.target.files[0])} } className="hidden" accept=".json"/>
+            {isMobile && (
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon"><MoreVertical className="h-5 w-5" /></Button>
+                </SheetTrigger>
+                <SheetContent side="bottom" className="rounded-t-lg p-4 h-auto">
+                    <div className="grid gap-1">
+                      <Dialog>
+                        <DialogTrigger asChild>
+                           <Button variant="ghost" className="w-full justify-start text-base py-6"><HelpCircle className="mr-4"/> Help & Guide</Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-full w-full h-full flex flex-col p-0 gap-0 border-0">
+                          <DialogHeader className="p-4 border-b flex flex-row items-center">
+                            <DialogTitle className="font-headline text-lg">Quick Guide</DialogTitle>
+                          </DialogHeader>
+                          <ScrollArea className="flex-grow">
+                            <div className="text-sm space-y-6 max-h-full p-8 prose dark:prose-invert max-w-4xl mx-auto">
+                                <div className="space-y-2">
+                                  <h4 className="font-bold">Spaces</h4>
+                                  <p className="text-muted-foreground">Spaces are like folders for organizing your artifacts. Navigate to the Spaces view from the sidebar to see all your spaces. Click the <Plus className="inline h-4 w-4" /> button to create a new one. To make a space "smart", add tags to it in the Space Editor, and it will automatically collect any artifacts with those tags.</p>
+                                </div>
+                                <div className="space-y-2">
+                                  <h4 className="font-bold">Searching</h4>
+                                  <p className="text-muted-foreground">Use the search bar to find anything. Your search will apply to the current view (e.g., searching within a Space, across all artifacts, or through your Anchors).</p>
+                                  <h5 className="font-semibold pt-2 text-foreground">Special Keywords</h5>
+                                  <ul className="list-disc list-inside space-y-1 pl-4 text-muted-foreground">
+                                    <li><code className="bg-muted px-1 py-0.5 rounded text-foreground">trash</code> to view trashed items.</li>
+                                    <li><code className="bg-muted px-1 py-0.5 rounded text-foreground">fav</code> or <code className="bg-muted px-1 py-0.5 rounded text-foreground">favorites</code> to view your favorites.</li>
+                                    <li><code className="bg-muted px-1 py-0.5 rounded text-foreground">\show</code> to view hidden artifacts.</li>
+                                    <li>A type name like <code className="bg-muted px-1 py-0.5 rounded text-foreground">note</code>, <code className="bg-muted px-1 py-0.5 rounded text-foreground">image</code>, or <code className="bg-muted px-1 py-0.5 rounded text-foreground">article</code> to filter by type.</li>
+                                  </ul>
+                                  <h5 className="font-semibold pt-2 text-foreground">Time-Travel Search</h5>
+                                  <p className="text-muted-foreground">Search for artifacts from a specific time. Type a date or timeframe into the search bar and press <strong>Enter</strong>.</p>
+                                  <ul className="list-disc list-inside space-y-1 pl-4 text-muted-foreground">
+                                    <li>Examples: <code className="bg-muted px-1 py-0.5 rounded text-foreground">yesterday</code>, <code className="bg-muted px-1 py-0.5 rounded text-foreground">last week</code>, <code className="bg-muted px-1 py-0.5 rounded text-foreground">February 2024</code>, <code className="bg-muted px-1 py-0.5 rounded text-foreground">20240728</code>.</li>
+                                  </ul>
+                                </div>
+                                <div className="space-y-2">
+                                  <h4 className="font-bold pt-2">Creating Artifacts</h4>
+                                  <p className="text-muted-foreground">Click the main <Plus className="inline h-4 w-4" /> button to create an artifact. To add to a space, go into that space first, or assign it from the editor.</p>
+                                  <ul className="list-disc list-inside space-y-1 pl-4 text-muted-foreground">
+                                    <li><strong>Paste a URL</strong> (e.g., <code className="bg-muted px-1 py-0.5 rounded text-foreground">example.com</code>) to automatically import an article or a YouTube video.</li>
+                                    <li><strong>Paste a hex code</strong> (e.g., <code className="bg-muted px-1 py-0.5 rounded text-foreground">#D45715</code>) to create a color swatch.</li>
+                                    <li><strong>Write a note</strong> with Markdown support.</li>
+                                  </ul>
+                                </div>
+                                <div className="space-y-2">
+                                  <h4 className="font-bold pt-2">Anchors & Wiki Links</h4>
+                                  <p className="text-muted-foreground">Create connections between your ideas using two powerful methods:</p>
+                                  <ul className="list-disc list-inside space-y-1 pl-4 text-muted-foreground">
+                                    <li><strong>Anchors:</strong> Use the "Anchors" page to create named references that link to one or more artifacts. This is great for managing topics or projects.</li>
+                                    <li><strong>Wiki Links:</strong> Directly link between artifacts by typing <code className="bg-muted px-1 py-0.5 rounded text-foreground">[[artifact-id]]</code> in a note's content.</li>
+                                  </ul>
+                                </div>
+                            </div>
+                          </ScrollArea>
+                        </DialogContent>
+                      </Dialog>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                           <Button variant="ghost" className="w-full justify-start text-base py-6"><Shield className="mr-4"/> Privacy & Data</Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-full w-full h-full flex flex-col p-0 gap-0 border-0">
+                            <DialogHeader className="p-4 border-b flex flex-row items-center">
+                              <DialogTitle className="font-headline text-lg">Privacy & Data Management</DialogTitle>
+                            </DialogHeader>
+                            <ScrollArea className="flex-grow">
+                              <div className="text-sm space-y-8 max-h-full p-8 prose dark:prose-invert max-w-4xl mx-auto">
+                                  <div className="space-y-2">
+                                      <h4 className="font-bold flex items-center gap-2"><Shield className="w-4 h-4"/> Privacy First</h4>
+                                      <p className="text-muted-foreground">All your data is stored locally in your browser's IndexedDB. Nothing is sent to any server. You have full control. Use the Import/Export buttons in Settings at any time to back up or move your data.</p>
+                                  </div>
+                                  <div className="pt-6">
+                                      <h4 className="font-semibold text-destructive mb-2">Danger Zone</h4>
+                                      <p className="text-sm text-muted-foreground">To permanently delete all data in your vault, type the following phrase into the main search bar and press Enter:</p>
+                                      <code className="block text-center bg-muted text-destructive font-mono p-3 rounded-md mt-2">✱ steal all artifacts ✱</code>
+                                  </div>
+                              </div>
+                            </ScrollArea>
+                        </DialogContent>
+                      </Dialog>
+                      <Separator className="my-1"/>
+                      <Button variant="ghost" className="w-full justify-start text-base py-6" onClick={() => fileInputRef.current?.click()}><Upload className="mr-4"/> Import from file</Button>
+                      <Button variant="ghost" className="w-full justify-start text-base py-6" onClick={exportData}><Download className="mr-4"/> Export to file</Button>
+                    </div>
+                </SheetContent>
+              </Sheet>
+            )}
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto relative">
+        <div className="flex-1 overflow-y-auto relative pb-16 md:pb-0">
           {isLoading ? (
             renderSkeletonGrid()
           ) : (
@@ -494,7 +564,7 @@ export default function MainView() {
             </>
           )}
           {!activeSpace && (
-            <Button onClick={handleFabClick} className="bg-primary hover:bg-primary/90 rounded-full h-14 w-14 fixed bottom-8 right-8 shadow-lg z-20">
+            <Button onClick={handleFabClick} className="bg-primary hover:bg-primary/90 rounded-full h-14 w-14 fixed bottom-20 right-8 md:bottom-8 shadow-lg z-20">
               <Plus className="h-6 w-6" />
             </Button>
           )}
@@ -531,6 +601,9 @@ export default function MainView() {
               </AlertDialogFooter>
           </AlertDialogContent>
       </AlertDialog>
+      
+      {isMobile && <MobileBottomNav activeView={activeView} onViewChange={(view) => updateQuery({ view: view, space: null })} />}
     </div>
   );
 }
+
