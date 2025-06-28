@@ -72,7 +72,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const { toast } = useToast();
 
   const loadData = useCallback(async () => {
-    setIsLoading(true);
     try {
       const [dbArtifacts, dbAnchors, dbSpaces] = await Promise.all([getAllArtifacts(), getAllAnchors(), getAllSpaces()]);
       setArtifacts(dbArtifacts);

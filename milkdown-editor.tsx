@@ -1,26 +1,19 @@
 
 'use client';
 
-import React, { useImperativeHandle, forwardRef, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Editor, rootCtx, editorViewOptionsCtx, defaultValueCtx } from '@milkdown/core';
 import { nord } from '@milkdown/theme-nord';
-import { Milkdown, MilkdownProvider, useEditor, useInstance } from '@milkdown/react';
+import { Milkdown, MilkdownProvider, useEditor } from '@milkdown/react';
 import { commonmark } from '@milkdown/preset-commonmark';
 import { gfm } from '@milkdown/preset-gfm';
 import { listener, listenerCtx } from '@milkdown/plugin-listener';
-import { history, undo, redo } from '@milkdown/plugin-history';
-import { callCommand } from '@milkdown/utils';
-
+import { history } from '@milkdown/plugin-history';
 
 interface MilkdownEditorProps {
   content: string;
   onChange: (markdown: string) => void;
   readOnly?: boolean;
-}
-
-export interface MilkdownEditorHandles {
-  undo: () => void;
-  redo: () => void;
 }
 
 const PLACEHOLDERS = [
@@ -36,10 +29,7 @@ const PLACEHOLDERS = [
 ];
 
 
-const MilkdownInternal = forwardRef<MilkdownEditorHandles, MilkdownEditorProps & { placeholder: string }>(
-  ({ content, onChange, readOnly, placeholder }, ref) => {
-    const [getInstance, loading] = useInstance();
-
+const MilkdownInternal = ({ content, onChange, readOnly, placeholder }: MilkdownEditorProps & { placeholder: string }) => {
     useEditor((root) => {
       return Editor.make()
         .config((ctx) => {
@@ -59,27 +49,15 @@ const MilkdownInternal = forwardRef<MilkdownEditorHandles, MilkdownEditorProps &
         .use(commonmark)
         .use(gfm)
         .use(listener)
-        .use(history)
+        .use(history);
     });
     
-    useImperativeHandle(ref, () => ({
-      undo: () => {
-        if (loading) return;
-        getInstance()?.action(callCommand(undo.key));
-      },
-      redo: () => {
-        if (loading) return;
-        getInstance()?.action(callCommand(redo.key));
-      },
-    }));
-    
     return <Milkdown />;
-  }
-);
+};
 MilkdownInternal.displayName = 'MilkdownInternal';
 
 
-export const MilkdownEditor = forwardRef<MilkdownEditorHandles, MilkdownEditorProps>((props, ref) => {
+export const MilkdownEditor = (props: MilkdownEditorProps) => {
     const [mounted, setMounted] = useState(false);
     const [placeholder, setPlaceholder] = useState('');
 
@@ -98,8 +76,8 @@ export const MilkdownEditor = forwardRef<MilkdownEditorHandles, MilkdownEditorPr
 
     return (
         <MilkdownProvider>
-            <MilkdownInternal {...props} placeholder={placeholder} ref={ref} />
+            <MilkdownInternal {...props} placeholder={placeholder} />
         </MilkdownProvider>
     );
-});
+};
 MilkdownEditor.displayName = 'MilkdownEditor';

@@ -327,7 +327,7 @@ export function ArtifactViewer({ artifact, isOpen, onClose, onEdit, onNavigate, 
               }
             `}</style>
             <ScrollArea ref={scrollAreaRef} className="flex-grow bg-background">
-              <div className="container mx-auto px-4 py-12">
+              <div className="container mx-auto px-6 sm:px-4 py-12">
                 {artifact.leadImageUrl && (
                   <div className="relative aspect-[16/4] mb-8 rounded-lg overflow-hidden -mx-4">
                     <img
@@ -667,5 +667,3 @@ export function ArtifactViewer({ artifact, isOpen, onClose, onEdit, onNavigate, 
     </Dialog>
   );
 }
-
-    
