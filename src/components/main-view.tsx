@@ -50,6 +50,8 @@ const PLACEHOLDERS = [
   'Remember those moments?',
 ];
 
+const SKELETON_ASPECT_RATIOS = ['aspect-[4/3]', 'aspect-square', 'aspect-[3/4]', 'aspect-[4/5]', 'aspect-[2/3]'];
+
 export default function MainView() {
   const { 
     artifacts: artifactsContext,
@@ -71,10 +73,16 @@ export default function MainView() {
   const [isDetonateDialogOpen, setDetonateDialogOpen] = useState(false);
   const [spaceToDelete, setSpaceToDelete] = useState<Space | null>(null);
   const [isSheetOpen, setSheetOpen] = useState(false);
+  const [skeletonRatios, setSkeletonRatios] = useState<string[]>([]);
   
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => {
     setIsMounted(true);
+    // Generate random aspect ratios for the skeleton loader only on the client
+    const ratios = Array.from({ length: 15 }).map(() => 
+      SKELETON_ASPECT_RATIOS[Math.floor(Math.random() * SKELETON_ASPECT_RATIOS.length)]
+    );
+    setSkeletonRatios(ratios);
   }, []);
 
   const { toast } = useToast();
@@ -343,13 +351,24 @@ export default function MainView() {
 
   const renderSkeletonGrid = () => (
     <div className="p-4 sm:p-6 lg:p-8 columns-2 sm:columns-2 md:columns-3 lg:columns-4 xl:columns-5 gap-4">
-      {Array.from({ length: 10 }).map((_, i) => (
+      {(skeletonRatios.length > 0 ? skeletonRatios : Array(15).fill(SKELETON_ASPECT_RATIOS[0])).map((aspectRatio, i) => (
         <div key={i} className="mb-4 break-inside-avoid">
-          <Skeleton className="w-full aspect-[4/3] rounded-lg" />
+          <Skeleton className={cn("w-full rounded-lg", aspectRatio)} />
         </div>
       ))}
     </div>
   );
+  
+  const renderInitialSkeleton = () => (
+    <div className="p-4 sm:p-6 lg:p-8 columns-2 sm:columns-2 md:columns-3 lg:columns-4 xl:columns-5 gap-4">
+      {Array.from({ length: 15 }).map((_, i) => (
+        <div key={i} className="mb-4 break-inside-avoid">
+          <Skeleton className={cn("w-full rounded-lg", SKELETON_ASPECT_RATIOS[i % SKELETON_ASPECT_RATIOS.length])} />
+        </div>
+      ))}
+    </div>
+  );
+
 
   if (!isMounted) {
     return (
@@ -388,7 +407,7 @@ export default function MainView() {
             <div className="flex items-center gap-2 flex-grow justify-center">
               <div className="relative w-full max-w-md">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Whisper a query to the digital void..." className="pl-9" value="" readOnly />
+                <Input placeholder={placeholder} className="pl-9" value="" readOnly />
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -397,7 +416,7 @@ export default function MainView() {
           </header>
 
           <div className="flex-1 overflow-y-auto relative">
-            {renderSkeletonGrid()}
+            {renderInitialSkeleton()}
           </div>
         </main>
       </div>
