@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
@@ -319,7 +318,7 @@ export function ArtifactViewer({ artifact, isOpen, onClose, onEdit, onNavigate, 
                 <DialogTitle>{artifact.title || 'Article'}</DialogTitle>
             </DialogHeader>
             <ScrollArea ref={scrollAreaRef} className="flex-grow bg-background">
-              <div className="container mx-auto px-4 sm:px-6 py-12">
+              <div className="container mx-auto px-4 py-12">
                 {artifact.leadImageUrl && (
                   <div className="relative aspect-[16/4] mb-8 rounded-lg overflow-hidden -mx-4 sm:-mx-6">
                     <img
@@ -330,10 +329,25 @@ export function ArtifactViewer({ artifact, isOpen, onClose, onEdit, onNavigate, 
                     />
                   </div>
                 )}
-                <article className="prose prose-lg lg:prose-xl dark:prose-invert mx-auto max-w-[65ch] text-pretty">
-                  <h1 className="font-headline text-center">{artifact.title}</h1>
-                  <div dangerouslySetInnerHTML={{ __html: artifact.content }} />
-                </article>
+                <div className="flex justify-center w-full">
+                  <article className="prose prose-lg lg:prose-xl dark:prose-invert mx-auto max-w-[65ch] w-full text-pretty">
+                    <h1 className="font-headline text-center">{artifact.title}</h1>
+                    <div dangerouslySetInnerHTML={{ __html: artifact.content }} />
+                  </article>
+                </div>
+                <div className="flex justify-center w-full">
+                  <ReactMarkdown
+                    className="prose prose-lg lg:prose-xl dark:prose-invert mx-auto max-w-[65ch] w-full text-pretty"
+                    remarkPlugins={[remarkGfm]}
+                    rehypePlugins={[rehypeRaw]}
+                    urlTransform={(url) => url}
+                    components={{
+                      code: ({node, inline, className, children, ...props}) => {
+                        return <code className={cn(className, "break-words whitespace-pre-wrap overflow-x-auto block p-2 rounded-md max-w-full")} {...props}>{children}</code>
+                      }
+                    }}
+                  >{artifact.content}</ReactMarkdown>
+                </div>
               </div>
             </ScrollArea>
              <DialogFooter className={cn("p-4 border-t gap-2 transition-transform duration-300 flex-row justify-center", !showFooter && "translate-y-full")}>
@@ -348,6 +362,7 @@ export function ArtifactViewer({ artifact, isOpen, onClose, onEdit, onNavigate, 
               {artifact.source && (
                  <Button variant="outline" asChild>
                     <a href={artifact.source} target="_blank" rel="noopener noreferrer">
+ 
                         <ExternalLink className="h-4 w-4" />
                         <span className={cn('md:inline-block', isMobile && 'hidden', 'ml-2')}>Visit Original</span>
                     </a>
