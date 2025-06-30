@@ -60,23 +60,41 @@ export function getDb(): Promise<IDBPDatabase<MiniAlpsDB>> {
 
 export async function importFromJSON(data: { artifacts?: Artifact[], spaces?: Space[], anchors?: Anchor[] }): Promise<void> {
   const db = await getDb();
-  
+
   if (data.artifacts) {
     const tx = db.transaction(ARTIFACTS_STORE_NAME, 'readwrite');
-    await tx.store.clear();
-    await Promise.all(data.artifacts.map(artifact => tx.store.put(artifact)));
+    await Promise.all(
+      data.artifacts.map(async (artifact) => {
+        const existing = await tx.store.get(artifact.id);
+        if (!existing || (existing.updatedAt ?? 0) < artifact.updatedAt) {
+          await tx.store.put(artifact);
+        }
+      })
+    );
     await tx.done;
   }
   if (data.spaces) {
     const tx = db.transaction(SPACES_STORE_NAME, 'readwrite');
-    await tx.store.clear();
-    await Promise.all(data.spaces.map(space => tx.store.put(space)));
+    await Promise.all(
+      data.spaces.map(async (space) => {
+        const existing = await tx.store.get(space.id);
+        if (!existing || (existing.updatedAt ?? 0) < space.updatedAt) {
+          await tx.store.put(space);
+        }
+      })
+    );
     await tx.done;
   }
   if (data.anchors) {
     const tx = db.transaction(ANCHORS_STORE_NAME, 'readwrite');
-    await tx.store.clear();
-    await Promise.all(data.anchors.map(anchor => tx.store.put(anchor)));
+    await Promise.all(
+      data.anchors.map(async (anchor) => {
+        const existing = await tx.store.get(anchor.id);
+        if (!existing || (existing.updatedAt ?? 0) < anchor.updatedAt) {
+          await tx.store.put(anchor);
+        }
+      })
+    );
     await tx.done;
   }
 }
