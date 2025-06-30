@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { X, Tag, Loader2, Paperclip, Maximize, Minimize } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { extractYouTubeID, getYouTubeThumbnail, getYouTubeTitle } from '@/lib/youtube';
+import { getPinterestImage } from '@/lib/pinterest';
 import { MilkdownEditor } from './milkdown-editor';
 import { colors } from '@/lib/color-names';
 import { findClosestColor } from '@/lib/color-utils';
@@ -225,6 +226,30 @@ export function ArtifactEditor({ artifact, isOpen, onClose, activeSpaceId }: Art
           toast({ title: "YouTube Video Saved" });
           localStorage.removeItem(DRAFT_KEY);
           setIsProcessing(false); handleDelayedClose(); return;
+        }
+
+        const pinterestRegex = /(pinterest\.com|pin\.it)/i;
+        if (pinterestRegex.test(detectionContent)) {
+          const pinUrl = detectionContent.startsWith('http') ? detectionContent : `https://${detectionContent}`;
+          if (typeof navigator !== 'undefined' && !navigator.onLine) {
+            await artifactsContext.add({ ...artifactBaseData, content: pinUrl, type: 'note', source: pinUrl });
+            toast({ title: "You're offline", description: "Link saved as note." });
+            localStorage.removeItem(DRAFT_KEY);
+            setIsProcessing(false); handleDelayedClose(); return;
+          }
+          try {
+            const { imageUrl, title: pinTitle } = await getPinterestImage(pinUrl);
+            if (!imageUrl) throw new Error('Could not fetch image');
+            await artifactsContext.add({ ...artifactBaseData, title: pinTitle || title.trim() || 'Pinterest Image', content: '', source: imageUrl, type: 'image' });
+            toast({ title: "Image Imported" });
+          } catch (error: any) {
+            console.error('Failed to import Pinterest link', error);
+            toast({ variant: 'destructive', title: 'Pinterest Import Failed', description: error.message || 'Could not fetch image. Saving link instead.' });
+            await artifactsContext.add({ ...artifactBaseData, content: pinUrl, type: 'note', source: pinUrl });
+          } finally {
+            localStorage.removeItem(DRAFT_KEY);
+            setIsProcessing(false); handleDelayedClose(); return;
+          }
         }
         
         const isUrlLike = /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/[^\s]*)?$/.test(detectionContent) && detectionContent.split(/\s+/).length === 1;
